@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Knapsack Problem Visualizer</title>
+<script src="https://cdn.tailwindcss.com/3.4.16"></script>
+<script>tailwind.config={theme:{extend:{colors:{primary:'#92A8D1',secondary:'#F7CAC9'},borderRadius:{'none':'0px','sm':'4px',DEFAULT:'8px','md':'12px','lg':'16px','xl':'20px','2xl':'24px','3xl':'32px','full':'9999px','button':'8px'}}}}</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.6.0/remixicon.min.css">
+<link rel="stylesheet" href="style.css">
+</head>
+<body class="min-h-screen">
+<div class="container mx-auto px-4 py-8 max-w-6xl bg-gradient-to-br from-[#85e79a] to-[#85e79a] rounded-xl shadow-sm">
+<h1 class="text-2xl font-bold mb-6 text-[#012761]">Fractional Knapsack Visualizer</h1>
+<!-- Container Configuration -->
+<div class="mb-6 bg-white/60 p-6 rounded-lg shadow-sm">
+<div class="flex items-center mb-4">
+<label for="capacity" class="w-40 text-[#8193B2]">Weight capacity (kg)</label>
+<input type="number" id="capacity" class="border border-[#E4E9F2] rounded-lg px-3 py-2 w-48 focus:outline-none focus:ring-2 focus:ring-[#92A8D1] focus:border-transparent bg-white/80" value="15">
+</div>
+</div>
+<!-- Add Item Section -->
+<h2 class="text-xl font-semibold mb-4 text-[#012761]">Add an item</h2>
+<div class="flex flex-wrap gap-4 mb-4 bg-white/60 p-6 rounded-lg shadow-sm">
+<input type="text" id="itemName" placeholder="Name/Type" class="border border-[#E4E9F2] rounded-lg px-3 py-2 flex-1 min-w-[200px] focus:outline-none focus:ring-2 focus:ring-[#92A8D1] focus:border-transparent bg-white/80">
+<input type="number" id="itemWeight" placeholder="Weight kg" class="border border-[#E4E9F2] rounded-lg px-3 py-2 flex-1 min-w-[150px] focus:outline-none focus:ring-2 focus:ring-[#92A8D1] focus:border-transparent bg-white/80">
+<input type="number" id="itemValue" placeholder="Value" class="border border-[#E4E9F2] rounded-lg px-3 py-2 flex-1 min-w-[150px] focus:outline-none focus:ring-2 focus:ring-[#92A8D1] focus:border-transparent bg-white/80">
+<button id="addItemBtn" class="bg-[#92A8D1] text-white px-4 py-2 !rounded-button whitespace-nowrap hover:bg-[#7B93BC] transition-colors shadow-sm">+ Add</button>
+</div>
+<!-- Added Items List -->
+<div class="mb-6 bg-white/60 p-6 rounded-lg shadow-sm">
+<h2 class="text-xl font-semibold mb-4 text-[#012761]">Added Items</h2>
+<div class="overflow-x-auto">
+<table class="w-full">
+<thead>
+<tr class="bg-[#F7F9FC]">
+<th class="text-left px-4 py-2 text-[#8193B2] border border-[#E4E9F2]">Item Name</th>
+<th class="text-left px-4 py-2 text-[#8193B2] border border-[#E4E9F2]">Weight (kg)</th>
+<th class="text-left px-4 py-2 text-[#8193B2] border border-[#E4E9F2]">Value</th>
+<th class="text-left px-4 py-2 text-[#8193B2] border border-[#E4E9F2]">Value/Weight Ratio</th>
+</tr>
+</thead>
+<tbody id="addedItemsList">
+</tbody>
+</table>
+</div>
+</div>
+<!-- Action Buttons -->
+<div class="flex gap-4 mb-8">
+<button id="visualizeBtn" class="bg-[#92A8D1] text-white px-6 py-2 !rounded-button whitespace-nowrap hover:bg-[#7B93BC] transition-colors shadow-sm">Visualize</button>
+<button id="resetBtn" class="bg-[#F7CAC9] text-[#6B7A99] px-6 py-2 !rounded-button whitespace-nowrap hover:bg-[#F5B7B6] transition-colors shadow-sm">Reset</button>
+</div>
+<!-- Visualization Area -->
+<div class="flex flex-col md:flex-row gap-6 mb-8">
+<!-- Container Visualization -->
+<div class="flex-1 border border-[#E4E9F2] rounded-lg overflow-hidden bg-white/60 min-h-[300px] relative shadow-sm">
+<div id="containerVisualization" class="p-4 h-full">
+<div id="weightStatus" class="absolute top-2 right-4 text-sm text-[#8193B2]">0/0 kg</div>
+<div id="itemsContainer" class="h-full flex flex-col"></div>
+</div>
+</div>
+<!-- Code Execution Viewer -->
+<div class="flex-1 border border-[#E4E9F2] rounded-lg overflow-hidden bg-white/60 min-h-[300px] shadow-sm">
+<div id="codeViewer" class="p-4 h-full overflow-auto code-font text-sm text-[#6B7A99]">
+sorted = items.sort(by ratio desc);
+rem = capacity;
+for item of sorted {
+if rem <= 0 break;
+if item.weight <= rem {
+take item fully;
+rem -= item.weight;
+} else {
+fraction = rem / item.weight;
+take fraction of item;
+rem = 0;
+}
+}
+</div>
+</div>
+</div>
+<!-- Items Gallery -->
+<div class="mb-8">
+<h2 class="text-xl font-semibold mb-4 text-[#012761] flex items-center justify-between">
+Items Gallery
+<button id="sortGalleryBtn" class="text-sm bg-[#92A8D1] text-white px-4 py-2 !rounded-button whitespace-nowrap hover:bg-[#7B93BC] transition-colors shadow-sm flex items-center gap-2">
+<i class="ri-sort-desc"></i> Sort by Value/Weight
+</button>
+</h2>
+<div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+<div id="itemsGallery" class="contents transition-all duration-500"></div>
+</div>
+</div>
+<!-- Result Summary -->
+<div class="mb-8">
+<h2 class="text-xl font-semibold mb-4 text-[#012761] flex items-center gap-2">
+<i class="ri-file-list-3-line"></i> Result Summary
+</h2>
+<div class="overflow-x-auto bg-white/60 p-6 rounded-lg shadow-sm">
+<div class="flex flex-wrap gap-6 mb-6">
+<div class="flex-1 min-w-[200px] bg-white rounded-lg p-4 shadow-sm border-l-4" style="border-left-color: #92A8D1">
+<div class="text-sm text-[#8193B2] mb-1 flex items-center gap-2">
+<i class="ri-scales-3-line"></i> Total Weight Used
+</div>
+<div class="text-2xl font-semibold text-[#012761]" id="summaryWeight">0 kg</div>
+<div class="text-xs text-[#8193B2] mt-1" id="weightPercentage">0% of capacity</div>
+</div>
+<div class="flex-1 min-w-[200px] bg-white rounded-lg p-4 shadow-sm border-l-4" style="border-left-color: #F7CAC9">
+<div class="text-sm text-[#8193B2] mb-1 flex items-center gap-2">
+<i class="ri-money-dollar-circle-line"></i> Total Value Gained
+</div>
+<div class="text-2xl font-semibold text-[#012761]" id="summaryValue">0</div>
+<div class="text-xs text-[#8193B2] mt-1">Combined value from items</div>
+</div>
+<div class="flex-1 min-w-[200px] bg-white rounded-lg p-4 shadow-sm border-l-4" style="border-left-color: #B5E7A0">
+<div class="text-sm text-[#8193B2] mb-1 flex items-center gap-2">
+<i class="ri-box-3-line"></i> Items Used
+</div>
+<div class="text-2xl font-semibold text-[#012761]" id="summaryItems">0</div>
+<div class="text-xs text-[#8193B2] mt-1" id="itemsDetail">No items selected</div>
+</div>
+</div>
+<table class="w-full border-collapse">
+<thead>
+<tr class="bg-[#F7F9FC]">
+<th class="border border-[#E4E9F2] px-4 py-2 text-left text-[#8193B2]">Item</th>
+<th class="border border-[#E4E9F2] px-4 py-2 text-left text-[#8193B2]">Fraction Taken</th>
+<th class="border border-[#E4E9F2] px-4 py-2 text-left text-[#8193B2]">Weight Used (kg)</th>
+<th class="border border-[#E4E9F2] px-4 py-2 text-left text-[#8193B2]">Value Added</th>
+</tr>
+</thead>
+<tbody id="resultTableBody">
+<tr class="bg-white/80">
+<td colspan="2" class="border border-[#E4E9F2] px-4 py-2 font-medium text-[#012761]">Totals</td>
+<td class="border border-[#E4E9F2] px-4 py-2 text-[#012761]" id="totalWeight">0</td>
+<td class="border border-[#E4E9F2] px-4 py-2 text-[#012761]" id="totalValue">0</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<script src="script.js"></script>
+</body>
+</html>
